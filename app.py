@@ -1,10 +1,9 @@
 import os
 import streamlit as st
 from dotenv import load_dotenv
-from langchain_groq import ChatGroq
-from duckduckgo_search import DDGS
-from langgraph.graph import StateGraph, START, END
-from typing import TypedDict
+
+# Import compiled LangGraph workflow from agent.py
+from agent import graph
 
 # 1. Page Configuration
 st.set_page_config(
@@ -16,77 +15,98 @@ st.set_page_config(
 # Load environment variables
 load_dotenv()
 
+# Verify API Key presence
 if not os.getenv("GROQ_API_KEY"):
     st.error("🔑 `GROQ_API_KEY` is missing from your `.env` file!")
     st.stop()
 
-# 2. Initialize LLM & Search Function
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+# 2. Custom CSS for UI Enhancement (Fixed unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    /* Main container padding */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 800px;
+    }
+    
+    /* Header styling */
+    .stTitle {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+    
+    /* Badge styling */
+    .tech-badge {
+        display: inline-block;
+        background-color: #262730;
+        color: #FAFAFA;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-right: 6px;
+        border: 1px solid #363945;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-def perform_web_search(query: str) -> str:
-    try:
-        results = DDGS().text(query, max_results=3)
-        return "\n".join([f"- {r['title']}: {r['body']}" for r in results])
-    except Exception as e:
-        return f"Search error: {e}"
-
-# 3. Define LangGraph State & Nodes
-class AgentState(TypedDict):
-    topic: str
-    search_results: str
-    final_report: str
-
-def research_node(state: AgentState):
-    topic = state["topic"]
-    search_output = perform_web_search(topic)
-    return {"search_results": search_output}
-
-def writing_node(state: AgentState):
-    prompt = f"""
-    You are an expert research assistant. 
-    Synthesize the following web search results into a clean, well-structured research summary with key takeaways.
-
-    Topic: {state['topic']}
-    Search Results: {state['search_results']}
-    """
-    response = llm.invoke(prompt)
-    return {"final_report": response.content}
-
-# 4. Build LangGraph Workflow
-@st.cache_resource
-def get_graph():
-    builder = StateGraph(AgentState)
-    builder.add_node("researcher", research_node)
-    builder.add_node("writer", writing_node)
-    builder.add_edge(START, "researcher")
-    builder.add_edge("researcher", "writer")
-    builder.add_edge("writer", END)
-    return builder.compile()
-
-graph = get_graph()
-
-# 5. UI Layout
+# 3. Header Section
 st.title("🤖 Deep Research Agent")
-st.caption("Powered by LangGraph, Groq (Llama 3.3 70B), and DuckDuckGo")
+st.markdown("""
+<div style="margin-bottom: 20px;">
+    <span class="tech-badge">LangGraph</span>
+    <span class="tech-badge">Groq (Llama 3.3 70B)</span>
+    <span class="tech-badge">DuckDuckGo Search</span>
+    <span class="tech-badge">No RAG</span>
+</div>
+""", unsafe_allow_html=True)
+
+st.write("A lightweight, stateful **2-node research pipeline** that fetches live web search results and synthesizes clean executive summaries in seconds.")
+
+st.divider()
+
+# 4. User Input Section
+st.subheader("🔍 What would you like to research?")
 
 topic_input = st.text_input(
-    "Enter a research topic:",
-    placeholder="e.g., Latest breakthroughs in quantum computing"
+    label="Topic",
+    label_visibility="collapsed",
+    placeholder="e.g., Latest breakthroughs in fusion energy"
 )
 
-if st.button("Start Research", type="primary"):
+col1, col2 = st.columns([1, 4])
+with col1:
+    submit_btn = st.button("Start Research", type="primary", use_container_width=True)
+
+# 5. Execution & Output Display
+if submit_btn:
     if not topic_input.strip():
-        st.warning("Please enter a topic first.")
+        st.warning("⚠️ Please enter a research topic first.")
     else:
-        with st.status("🔍 Agent is conducting research...", expanded=True) as status:
-            st.write("1️⃣ Querying web search via DuckDuckGo...")
+        st.write("")
+        # Status container showing execution steps
+        with st.status("Executing 2-Node Graph Workflow...", expanded=True) as status:
+            st.write("1️⃣ **[Node 1: Researcher]** Querying live web results via DuckDuckGo...")
             
-            # Execute graph
+            # Execute the LangGraph pipeline
             results = graph.invoke({"topic": topic_input})
             
-            st.write("2️⃣ Synthesizing research report with Llama 3.3...")
+            st.write("2️⃣ **[Node 2: Writer]** Synthesizing research report with Groq (Llama 3.3 70B)...")
             status.update(label="✅ Research Complete!", state="complete", expanded=False)
 
-        # Display Final Report
-        st.markdown("### 📊 Research Report")
-        st.markdown(results["final_report"])
+        # Display Final Synthesized Report inside a tab structure
+        st.subheader("📊 Research Output")
+        
+        tab_report, tab_raw = st.tabs(["📄 Synthesized Report", "🔍 Raw Search Data"])
+        
+        with tab_report:
+            st.markdown(results["final_report"])
+            
+        with tab_raw:
+            st.caption("Raw snippets retrieved by Node 1 before LLM synthesis:")
+            st.code(results.get("search_results", "No search results captured."), language="markdown")
+
+# Footer
+st.divider()
+st.caption("💡 *Note: Designed as a simple 2-node graph pipeline without vector DBs or multi-agent orchestration.*")
