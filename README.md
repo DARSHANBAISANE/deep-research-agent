@@ -1,20 +1,20 @@
-Here is a complete, polished `README.md` content tailored to your exact project setup (LangGraph + Groq + DuckDuckGo Search).
-
-You can copy and paste this directly into your `README.md` file:
+Here is an updated `README.md` that incorporates both the original CLI execution and your new Streamlit Web UI:
 
 ```markdown
 # 🤖 Deep Research Agent
 
-An autonomous, multi-node research agent built with **LangGraph**, **LangChain**, and **Groq (Llama 3.3 70B)**. The agent receives a topic from the user, conducts a live web search using DuckDuckGo (`ddgs`), and synthesizes the gathered findings into a structured research summary.
+An autonomous, multi-node research agent built with **LangGraph**, **LangChain**, and **Groq (Llama 3.3 70B)**. The agent receives a topic, conducts real-time web searches using DuckDuckGo (`ddgs`), and synthesizes the findings into structured research reports. 
+
+Includes both an **Interactive Terminal (CLI)** and a **Streamlit Web UI**.
 
 ---
 
 ## 🌟 Features
 
-- **Multi-Node Workflow:** Constructed using a LangGraph state graph separating research and writing steps.
-- **Live Web Search:** Queries real-time information using `ddgs`.
+- **Multi-Node Workflow:** Constructed using a LangGraph state graph separating search retrieval and writing steps.
+- **Live Web Search:** Fetches real-time web results using `ddgs`.
 - **Fast Reasoning:** Powered by `llama-3.3-70b-versatile` via Groq.
-- **Interactive CLI:** Prompts user directly in the terminal for research topics.
+- **Dual Interfaces:** Run directly in the terminal or launch a modern Streamlit web application.
 
 ---
 
@@ -22,7 +22,7 @@ An autonomous, multi-node research agent built with **LangGraph**, **LangChain**
 
 ### 1. Clone the Repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/deep-research-agent.git](https://github.com/YOUR_USERNAME/deep-research-agent.git)
+git clone [https://github.com/DARSHANBAISANE/deep-research-agent.git](https://github.com/DARSHANBAISANE/deep-research-agent.git)
 cd deep-research-agent
 
 ```
@@ -44,7 +44,7 @@ venv\Scripts\activate
 ### 3. Install Required Dependencies
 
 ```bash
-pip install langgraph langchain-groq python-dotenv ddgs
+pip install langgraph langchain-groq python-dotenv ddgs streamlit
 
 ```
 
@@ -59,27 +59,27 @@ GROQ_API_KEY=your_groq_api_key_here
 ```
 
 
-2. Obtain a free Groq API key from the [Groq Console](https://console.groq.com/keys).
+2. Obtain a free API key from [GroqCloud](https://console.groq.com/keys).
 
 ---
 
-## 🚀 Usage
+## 🚀 How to Run
 
-Run the agent script in your active environment:
+### Option A: Launch the Streamlit Web UI (Recommended)
+
+Run the web application in your browser:
 
 ```bash
-python agent.py
+streamlit run app.py
 
 ```
 
-When prompted, enter any research topic:
+### Option B: Run via Terminal (CLI)
 
-```text
-========================================
-      DEEP RESEARCH AGENT (GROQ)       
-========================================
+Run the command-line interface directly in your terminal:
 
-Enter a topic to research: Latest breakthroughs in quantum computing
+```bash
+python agent.py
 
 ```
 
@@ -92,23 +92,20 @@ deep-research-agent/
 │── venv/               # Virtual environment (ignored)
 │── .env               # API keys (ignored)
 │── .gitignore          # Files excluded from Git
-│── agent.py            # Main LangGraph agent implementation
+│── agent.py            # CLI version of the LangGraph agent
+│── app.py              # Streamlit Web UI implementation
 └── README.md           # Project documentation
-
-```
 
 ```
 
 ---
 
-### How to add this in VS Code:
-1. Open `README.md` in your VS Code editor.
-2. Select everything, delete, and paste the markdown block above.
-3. Save the file (`Ctrl + S`).
-4. Commit and push to GitHub:
-   ```cmd
-   git add README.md
-   git commit -m "Update README.md documentation"
-   git push
+## 🔗 Resources
+
+* **API Key Provider:** [GroqCloud Console](https://console.groq.com/keys)
+* **Framework:** [LangGraph Documentation](https://python.langchain.com/docs/langgraph)
 
 ```
+
+---
+
