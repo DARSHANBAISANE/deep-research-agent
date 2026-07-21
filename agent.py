@@ -1,74 +1,60 @@
 import os
+from typing import TypedDict
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_community.tools import DuckDuckGoSearchRun
+from duckduckgo_search import DDGS
 from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, Annotated, Sequence
-import operator
 
-# Load environment variables
+# Load API Key
 load_dotenv()
 
-if not os.getenv("GROQ_API_KEY"):
-    raise ValueError("GROQ_API_KEY is missing from your .env file!")
-
-# 1. Initialize LLM & Web Search Tool
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
-search_tool = DuckDuckGoSearchRun()
-
-# 2. Define State
+# 1. Define Graph State (Holds topic, search results, and final report)
 class AgentState(TypedDict):
     topic: str
     search_results: str
     final_report: str
 
-# 3. Define Node Functions
+# Initialize LLM (No RAG, no embedding models)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+
+# Node 1: Live Web Search (No Vector DB / RAG)
 def research_node(state: AgentState):
     topic = state["topic"]
-    print(f"\n[1/2] 🔍 Searching web for: '{topic}'...")
+    try:
+        results = DDGS().text(topic, max_results=3)
+        formatted_results = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+    except Exception as e:
+        formatted_results = f"Search error: {e}"
     
-    # Perform live web search
-    search_output = search_tool.invoke(topic)
-    return {"search_results": search_output}
+    return {"search_results": formatted_results}
 
+# Node 2: Synthesis (Pure LLM Summarization — No citation scoring or ranking)
 def writing_node(state: AgentState):
-    print("[2/2] ✍️ Synthesizing research report...")
-    
     prompt = f"""
-    You are an expert research assistant. 
-    Synthesize the following web search results into a concise 3-bullet summary with key takeaways.
+    Synthesize the following live web search results into a clean, well-structured research summary.
 
     Topic: {state['topic']}
     Search Results: {state['search_results']}
     """
-    
     response = llm.invoke(prompt)
     return {"final_report": response.content}
 
-# 4. Build the LangGraph Workflow
-builder = StateGraph(AgentState)
+# 2. Build Simple Two-Node Graph Workflow (Not a multi-agent system)
+workflow = StateGraph(AgentState)
 
-builder.add_node("researcher", research_node)
-builder.add_node("writer", writing_node)
+workflow.add_node("researcher", research_node)
+workflow.add_node("writer", writing_node)
 
-# Flow: START -> researcher -> writer -> END
-builder.add_edge(START, "researcher")
-builder.add_edge("researcher", "writer")
-builder.add_edge("writer", END)
+# Linear execution: START -> researcher -> writer -> END
+workflow.add_edge(START, "researcher")
+workflow.add_edge("researcher", "writer")
+workflow.add_edge("writer", END)
 
-graph = builder.compile()
+# Compile graph
+graph = workflow.compile()
 
-# 5. Interactive Terminal Execution
 if __name__ == "__main__":
-    print("========================================")
-    print("      DEEP RESEARCH AGENT (GROQ)       ")
-    print("========================================")
-    
-    user_topic = input("\nEnter a topic to research: ")
-    
-    if user_topic.strip():
-        results = graph.invoke({"topic": user_topic})
-        print("\n========================================")
-        print("          FINAL RESEARCH REPORT         ")
-        print("========================================\n")
-        print(results["final_report"])
+    topic = input("Enter a research topic: ")
+    output = graph.invoke({"topic": topic})
+    print("\n--- Final Research Summary ---")
+    print(output["final_report"])
