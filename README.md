@@ -1,3 +1,6 @@
+Here is the updated, complete **`README.md`** file that matches all your project requirements (*No RAG, No citation scoring, 2-Node Graph workflow*) and includes both CLI & Streamlit execution steps:
+
+```markdown
 # 🤖 Deep Research Agent
 
 A lightweight, stateful **2-node research pipeline** built with **LangGraph**, **LangChain**, and **Groq (Llama 3.3 70B)**. 
@@ -25,3 +28,80 @@ deep-research-agent/
 ├── agent.py        # Core 2-node LangGraph logic & CLI entry point
 ├── app.py          # Streamlit Web UI implementation
 └── README.md       # Project documentation
+
+```
+
+---
+
+## 🛠️ Prerequisites & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone [https://github.com/DARSHANBAISANE/deep-research-agent.git](https://github.com/DARSHANBAISANE/deep-research-agent.git)
+cd deep-research-agent
+
+```
+
+### 2. Create & Activate Virtual Environment
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate on Windows
+venv\Scripts\activate
+
+# Activate on macOS/Linux
+source venv/bin/activate
+
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install langgraph langchain-groq python-dotenv ddgs streamlit
+
+```
+
+### 4. Set Up Environment Variables
+
+Create a `.env` file in the root directory and add your Groq API key:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+
+```
+
+---
+
+## 🚀 How to Run
+
+### Option A: Streamlit Web UI
+
+Launch the interactive web interface:
+
+```bash
+streamlit run app.py
+
+```
+
+### Option B: Terminal CLI
+
+Execute the 2-node pipeline directly in your console:
+
+```bash
+python agent.py
+
+```
+
+---
+
+## ⚙️ Architecture Workflow
+
+1. **Node 1: `researcher**` — Queries the DuckDuckGo API (`ddgs`) for live web search snippets based on the input topic.
+2. **Node 2: `writer**` — Takes the raw search output and passes it to Groq (`llama-3.3-70b-versatile`) to produce a structured summary.
+
+```
+
+```
