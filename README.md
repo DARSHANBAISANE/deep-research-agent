@@ -1,3 +1,9 @@
+<img width="957" height="937" alt="Screenshot 2026-07-27 193316" src="https://github.com/user-attachments/assets/374fc23a-f0dc-4976-9923-52b0d19e9464" />
+<img width="1837" height="943" alt="Screenshot 2026-07-27 193036" src="https://github.com/user-attachments/assets/9b83d36c-7200-4e44-b279-db47f61c93ee" />
+
+
+https://github.com/user-attachments/assets/09728910-544d-44da-bdc9-d521f2886664
+
 Here is the updated, complete **`README.md`** file that matches all your project requirements (*No RAG, No citation scoring, 2-Node Graph workflow*) and includes both CLI & Streamlit execution steps:
 
 ```markdown
